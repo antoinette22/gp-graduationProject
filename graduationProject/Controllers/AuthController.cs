@@ -26,30 +26,34 @@ namespace graduationProject.Controllers
             _configuration = configuration;
         }
         //seed roles
-        [HttpPost]
-        [Route("seed-roles")]
-        public async Task<IActionResult> SeedRoles()
-        {
-            bool isOwnerRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.OWNER);
-            bool isAdminRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.ADMIN);
-            bool isUserRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.USER);
-            if(isOwnerRoleExists && isAdminRoleExists && isUserRoleExists)
-                return Ok("Roles Seeding is already Done");
-            await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.USER));
-            await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.ADMIN));
-            await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.OWNER));
-            return Ok("Roles Seeding Done Successfully");
+        /* [HttpPost]
+         [Route("seed-roles")]
+         public async Task<IActionResult> SeedRoles()
+         {
+             bool isOwnerRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.OWNER);
+             bool isAdminRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.ADMIN);
+             bool isUserRoleExists = await _roleManager.RoleExistsAsync(StaticUserRoles.USER);
+             if(isOwnerRoleExists && isAdminRoleExists && isUserRoleExists)
+                 return Ok("Roles Seeding is already Done");
+             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.USER));
+             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.ADMIN));
+             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.OWNER));
+             return Ok("Roles Seeding Done Successfully");
 
-        }
-
+         }
+        */
         // register
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            var isExistsUser= await _userManager.FindByNameAsync(registerDto.UserName);
+            var isExistsUser = await _userManager.FindByNameAsync(registerDto.UserName);
             if (isExistsUser != null)
                 return BadRequest("UserName already Exist");
+            var user = await _userManager.FindByEmailAsync(registerDto.Email);
+            if (user != null)
+                return BadRequest("Email already Exist");
+
             IdentityUser newUser = new IdentityUser()
             {
                 Email = registerDto.Email,
@@ -57,7 +61,7 @@ namespace graduationProject.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
 
             };
-            var createUserResult=await _userManager.CreateAsync(newUser,registerDto.Password);
+            var createUserResult = await _userManager.CreateAsync(newUser, registerDto.Password);
             if (!createUserResult.Succeeded)
             {
                 var errorString = "User Creation failed because: ";
@@ -67,12 +71,13 @@ namespace graduationProject.Controllers
                 }
                 return BadRequest(errorString);
             }
-            await _userManager.AddToRoleAsync(newUser, StaticUserRoles.USER);
+            if (registerDto.IsInvestor)
+                await _userManager.AddToRoleAsync(newUser, "Investor");
+            else
+                await _userManager.AddToRoleAsync(newUser, "User");
             return Ok("User Created Successfully");
 
-
         }
-
         // Login 
         [HttpPost]
         [Route("Login")]
@@ -91,7 +96,7 @@ namespace graduationProject.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("JWTID",Guid.NewGuid().ToString()),
             };
-            foreach(var userRole in userRoles)
+            foreach (var userRole in userRoles)
             {
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
@@ -99,16 +104,16 @@ namespace graduationProject.Controllers
             return Ok(token);
 
         }
-        private string GenerateNewJsonWebToken(List<Claim> claims) 
+        private string GenerateNewJsonWebToken(List<Claim> claims)
         {
             var authSecret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
             var tokenObject = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddHours(24),
                 claims: claims,
-                signingCredentials: new SigningCredentials(authSecret,SecurityAlgorithms.HmacSha256)
-               
+                signingCredentials: new SigningCredentials(authSecret, SecurityAlgorithms.HmacSha256)
+
                 );
             string token = new JwtSecurityTokenHandler().WriteToken(tokenObject);
             return token;
@@ -116,4 +121,3 @@ namespace graduationProject.Controllers
         }
     }
 }
-

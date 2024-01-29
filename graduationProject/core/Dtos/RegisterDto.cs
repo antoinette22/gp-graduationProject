@@ -12,6 +12,8 @@ namespace graduationProject.core.Dtos
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
+        [Required]
+        public bool IsInvestor { get; set; }
 
     }
 }
