@@ -1,9 +1,12 @@
 ﻿using Azure.Identity;
+using graduationProject.core.DbContext;
 using graduationProject.core.Dtos;
 using graduationProject.core.OtherObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,12 +21,13 @@ namespace graduationProject.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
-
-        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        private readonly ApplicationDbContext _context;
+        public AuthController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, ApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _context = context;
         }
         //seed roles
         /* [HttpPost]
@@ -119,5 +123,47 @@ namespace graduationProject.Controllers
             return token;
 
         }
+
+        [HttpPost]
+        [Route("Update user information")]
+        public async Task<IActionResult> UpdateUser( [FromBody] UpdatePermissionDto updatePermissionDto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(updatePermissionDto.UserName))
+                {
+                    return BadRequest("UserName is required");
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == updatePermissionDto.UserName);
+
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                if (!string.IsNullOrEmpty(updatePermissionDto.newUserName))
+                {
+                    user.UserName = updatePermissionDto.newUserName;
+                }
+
+                if (!string.IsNullOrEmpty(updatePermissionDto.NewEmail))
+                {
+                    user.Email = updatePermissionDto.NewEmail;
+                }
+
+                _context.Entry(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return Ok("User information updated successfully");
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions appropriately
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+        }
+
     }
 }
