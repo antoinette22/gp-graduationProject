@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mahmo\\source\\repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj": {}
+    "C:\\Users\\Antoinette Emad\\Source\\Repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mahmo\\source\\repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj": {
+    "C:\\Users\\Antoinette Emad\\Source\\Repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mahmo\\source\\repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj",
+        "projectUniqueName": "C:\\Users\\Antoinette Emad\\Source\\Repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj",
         "projectName": "graduationProject",
-        "projectPath": "C:\\Users\\mahmo\\source\\repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj",
-        "packagesPath": "C:\\Users\\mahmo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mahmo\\source\\repos\\gp-graduationProject\\graduationProject\\obj\\",
+        "projectPath": "C:\\Users\\Antoinette Emad\\Source\\Repos\\gp-graduationProject\\graduationProject\\graduationProject.csproj",
+        "packagesPath": "C:\\Users\\Antoinette Emad\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Antoinette Emad\\Source\\Repos\\gp-graduationProject\\graduationProject\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\mahmo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Antoinette Emad\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.306\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -86,7 +87,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.306\\RuntimeIdentifierGraph.json"
         }
       }
     }
