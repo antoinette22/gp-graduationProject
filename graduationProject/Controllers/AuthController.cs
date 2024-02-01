@@ -3,6 +3,7 @@ using graduationProject.core.DbContext;
 using graduationProject.core.Dtos;
 using graduationProject.core.OtherObjects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -125,37 +126,37 @@ namespace graduationProject.Controllers
         }
 
         [HttpPost]
-        [Route("Update user information")]
-        public async Task<IActionResult> UpdateUser( [FromBody] UpdatePermissionDto updatePermissionDto)
+        [Route("change UserName")]
+        public async Task<IActionResult> changeUserName( [FromBody] ChangeUserNameDto changeUserName)
         {
             try
             {
-                if (string.IsNullOrEmpty(updatePermissionDto.UserName))
+                if (string.IsNullOrEmpty(changeUserName.UserName))
                 {
                     return BadRequest("UserName is required");
                 }
 
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == updatePermissionDto.UserName);
-
+                // var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == changeUserName.UserName);
+                var user = await _userManager.FindByNameAsync(changeUserName.UserName);
                 if (user == null)
                 {
                     return NotFound("User not found");
                 }
 
-                if (!string.IsNullOrEmpty(updatePermissionDto.newUserName))
+                if (!string.IsNullOrEmpty(changeUserName.newUserName))
                 {
-                    user.UserName = updatePermissionDto.newUserName;
+                    user.UserName = changeUserName.newUserName;
                 }
 
-                if (!string.IsNullOrEmpty(updatePermissionDto.NewEmail))
-                {
-                    user.Email = updatePermissionDto.NewEmail;
-                }
+                //if (!string.IsNullOrEmpty(updatePermissionDto.NewEmail))
+                //{
+                //    user.Email = updatePermissionDto.NewEmail;
+                //}
 
                 _context.Entry(user).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
-                return Ok("User information updated successfully");
+                return Ok("User name changed successfully");
             }
             catch (Exception ex)
             {
@@ -165,5 +166,98 @@ namespace graduationProject.Controllers
 
         }
 
+        [HttpPost]
+        [Route("change UserEmail")]
+        public async Task<IActionResult> changeEmail([FromBody] ChangeUserEmailDto changeUserEmail)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(changeUserEmail.UserName))
+                {
+                    return BadRequest("UserName is required");
+                }
+
+                // var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == changeUserName.UserName);
+                var user = await _userManager.FindByNameAsync(changeUserEmail.UserName);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                if (!string.IsNullOrEmpty(changeUserEmail.newEmail))
+                {
+                    user.Email = changeUserEmail.newEmail;
+                }
+
+                _context.Entry(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return Ok("User email changed successfully");
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions appropriately
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
+        }
+
+        [HttpPost]
+        [Route("change password")]
+
+        public async Task<IActionResult> ChangeUserPassword([FromBody] ChangePasswordDto changePassword)
+
+        {
+            //var user = await _userManager.FindByNameAsync(changePassword.UserName);
+            var user = await _userManager.FindByNameAsync(changePassword.UserName);
+            if (user is null || !await _userManager.CheckPasswordAsync(user, changePassword.CurrentPassword))
+            {
+                return BadRequest("invalid credintals");
+            }
+            var result = await _userManager.ChangePasswordAsync(user, changePassword.CurrentPassword, changePassword.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errorString = "Change Password failed because: ";
+                var errors = string.Empty;
+                foreach (var error in result.Errors)
+                {
+                    errors += $"{error.Description},";
+                }
+                return BadRequest(errorString);
+            }
+          else return Ok("password changed ");
+        
+         }
+        //try
+        //{
+        //    if (string.IsNullOrEmpty(changePassword.UserName))
+        //    {
+        //        return BadRequest("UserName is required");
+        //    }
+
+        //    // var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == changeUserName.UserName);
+        //    var user = await _userManager.FindByNameAsync(changePassword.UserName);
+        //    if (user == null)
+        //    {
+        //        return NotFound("User not found");
+        //    }
+
+        //    if (!string.IsNullOrEmpty(changePassword.newEmail))
+        //    {
+        //        user.Email = changePassword.newEmail;
+        //    }
+
+        //    _context.Entry(user).State = EntityState.Modified;
+        //    await _context.SaveChangesAsync();
+
+        //    return Ok("User information updated successfully");
+        //}
+        //catch (Exception ex)
+        //{
+        //    // Handle exceptions appropriately
+        //    return StatusCode(500, $"Internal server error: {ex.Message}");
+        //}
+
     }
+    
 }
